@@ -1,0 +1,40 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ category.title|default:"Barcha mahsulotlar" }} — Comfort Savdo{% endblock %}
+
+{% block content %}
+<div class="top"><h1>{{ category.title|default:"Barcha mahsulotlar" }}</h1>
+<form method="get">
+    <select name="sort" onchange="this.form.submit()">
+        <option value="p" {% if request.GET.sort != 'r' %}selected{% endif %}>Avval arzonlari</option>
+        <option value="r" {% if request.GET.sort == 'r' %}selected{% endif %}>Reyting bo'yicha</option>
+    </select>
+</form>
+</div>
+
+<div class="grid">
+    {% for product in products %}
+        <a class="pc" href="{% url 'product_detail' product.slug %}">
+            <div class="im" style="--c:{{ category.color|default:'#e8f5f0' }}">
+                {% if product.thumbnail_image %}<img src="{{ product.thumbnail_image.image.url }}" alt="{{ product.title }}">{% else %}🛍️{% endif %}
+            </div>
+            <div class="b">
+                <b>{{ product.title }}</b>
+                <div class="mu">{{ product.description|truncatechars:40 }}</div>
+                <div class="pr">
+                    {{ product.min_price|intcomma }} so'm
+                    {% if forloop.first and request.GET.sort != 'r' %}
+                        <small style="color:#fff;background:#0a7d5a;padding:2px 8px;border-radius:99px;font-size:.7rem">Eng arzon</small>
+                    {% endif %}
+                </div>
+                <span class="st">{% for i in "12345" %}{% if forloop.counter <= product.avg_rating %}★{% else %}☆{% endif %}{% endfor %}</span>
+                <span class="mu">{{ product.avg_rating|floatformat:1|default:"0" }} · {{ product.reviews.count }} izoh</span>
+            </div>
+        </a>
+    {% empty %}
+        <p class="mu">Bu kategoriyada hozircha mahsulot yo'q</p>
+    {% endfor %}
+</div>
+{% endblock %}

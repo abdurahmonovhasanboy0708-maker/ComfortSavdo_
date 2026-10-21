@@ -1,0 +1,42 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Mening kabinetim — Comfort Savdo{% endblock %}
+
+{% block extra_css %}
+<style>
+.card{background:#fff;border:1px solid #e2e7ee;border-radius:14px;padding:18px;margin-bottom:14px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;color:#6b7686;font-size:.85rem;font-weight:600;padding:8px}
+td{padding:10px 8px;border-top:1px solid #e2e7ee}
+.badge{padding:3px 10px;border-radius:99px;font-size:.8rem;color:#fff;background:#6b7686}
+.badge.new{background:#f5a623}
+.badge.delivered{background:#0a7d5a}
+.badge.cancelled{background:#c0392b}
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Mening kabinetim</h1>
+<p class="mu">Xush kelibsiz, {{ user.first_name|default:user.phone }}</p>
+
+<div class="card" style="margin-top:16px">
+    <h3>Mening buyurtmalarim</h3>
+    {% if orders %}
+    <table>
+        <tr><th>№</th><th>Sana</th><th>Summa</th><th>Holat</th></tr>
+        {% for order in orders %}
+        <tr>
+            <td>#{{ order.id }}</td>
+            <td>{{ order.created_at|date:"d.m.Y" }}</td>
+            <td>{{ order.total_price|intcomma }} so'm</td>
+            <td><span class="badge {{ order.status }}">{{ order.get_status_display }}</span></td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p class="mu">Hozircha buyurtmalaringiz yo'q.</p>
+    {% endif %}
+</div>
+{% endblock %}

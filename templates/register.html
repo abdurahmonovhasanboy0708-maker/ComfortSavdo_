@@ -1,0 +1,45 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Ro'yxatdan o'tish — Comfort Savdo{% endblock %}
+
+{% block extra_css %}
+<style>
+.auth-wrap{display:grid;place-items:center;padding:40px 16px}
+form.auth{background:#fff;border:1px solid #e2e7ee;border-radius:18px;padding:28px;width:100%;max-width:400px;display:grid;gap:12px}
+.logo{font-size:3rem;text-align:center}
+form.auth label{font-size:.85rem;color:#6b7686;display:grid;gap:4px}
+form.auth input{font:inherit;padding:11px 12px;border:1px solid #e2e7ee;border-radius:10px}
+#err{color:#c0392b;font-size:.9rem;min-height:1.2em}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+<!-- Django'da: <form method="post"> va {% csrf_token %} qo'shing -->
+<form class="auth" method="post" onsubmit="return chk()">
+ {% csrf_token %}
+ <div class="logo">🛒</div><h2 style="text-align:center">Ro'yxatdan o'tish</h2>
+
+ {% if messages %}
+     {% for message in messages %}
+         <p style="color:#c0392b;font-size:.9rem">{{ message }}</p>
+     {% endfor %}
+ {% endif %}
+
+ <label>Ism<input name="first_name" required placeholder="Ismingiz"></label>
+ <label>Telefon raqam<input name="phone_number" required placeholder="+998 90 123 45 67"></label>
+ <label>Parol<input id="p1" name="password" type="password" minlength="6" required></label>
+ <label>Parolni takrorlang<input id="p2" name="confirm_password" type="password" required></label>
+ <input type="hidden" name="ref" value="{{ request.GET.ref }}">
+ <div id="err"></div>
+ <button type="submit" class="btn" style="height:44px">Ro'yxatdan o'tish</button>
+</form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function chk(){if(p1.value!==p2.value){err.textContent='Parollar bir xil emas';return false}err.textContent='';return true}
+</script>
+{% endblock %}

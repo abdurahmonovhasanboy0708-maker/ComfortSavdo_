@@ -1,0 +1,98 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ product.title }} — Comfort Savdo{% endblock %}
+
+{% block extra_css %}
+<style>
+.card{background:#fff;border:1px solid #e2e7ee;border-radius:14px;padding:18px;margin-bottom:14px}
+.wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+#big{height:380px;font-size:9rem;border-radius:14px;--c:#e8f5f0}
+#big img{width:100%;height:100%;object-fit:cover;border-radius:14px}
+.th{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.th .im{height:100px;font-size:3rem;border-radius:10px;cursor:pointer;border:2px solid transparent}.th .im:hover{border-color:#0a7d5a}
+.store{display:flex;justify-content:space-between;gap:8px;padding:9px 12px;border-radius:8px;background:#f5f7fa;margin-top:6px;flex-wrap:wrap}
+.best{background:#e8f5f0}.store a{color:#0a7d5a;font-weight:600}
+.cm{padding:10px 0;border-bottom:1px solid #e2e7ee}
+textarea,select{width:100%;font:inherit;padding:10px;border:1px solid #e2e7ee;border-radius:8px;margin-top:8px}
+@media(max-width:900px){.wrap{grid-template-columns:1fr!important}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+ <div>
+  <div class="im" id="big">
+      {% if product.thumbnail_image %}<img src="{{ product.thumbnail_image.image.url }}" alt="{{ product.title }}">{% else %}🛍️{% endif %}
+  </div>
+  <div class="th">
+      {% if product.thumbnail_image %}
+      <div class="im" onclick="sw(this)" data-src="{{ product.thumbnail_image.image.url }}"><img src="{{ product.thumbnail_image.image.url }}" alt=""></div>
+      {% endif %}
+      {% for image in product.images.all %}
+          {% if not image.is_main %}
+          <div class="im" onclick="sw(this)" data-src="{{ image.image.url }}"><img src="{{ image.image.url }}" alt=""></div>
+          {% endif %}
+      {% endfor %}
+  </div>
+ </div>
+ <div class="card">
+  <h1>{{ product.title }}</h1>
+  <div>
+      <span class="st">{% for i in "12345" %}{% if forloop.counter <= product.avg_rating %}★{% else %}☆{% endif %}{% endfor %}</span>
+      <span class="mu">{{ product.avg_rating|floatformat:1|default:"0" }} ball · <span id="cnt">{{ product.reviews.count }}</span> ta izoh</span>
+  </div>
+  <div class="pr">{{ product.min_price|intcomma }} so'm</div>
+  <p>{{ product.description|linebreaksbr }}</p>
+  <h3 style="margin-top:16px">Qayerda sotiladi</h3>
+  {% for offer in product.offers.all %}
+  <div class="store {% if forloop.first %}best{% endif %}">
+      <span><b>{{ offer.market.name }}</b> · <b>{{ offer.price|intcomma }}</b>
+          {% if forloop.first %}<small style="background:#0a7d5a;color:#fff;padding:2px 8px;border-radius:99px">Eng arzon</small>{% endif %}
+      </span>
+      <a target="_blank" href="https://www.google.com/maps/search/?api=1&query={{ offer.market.latitude }},{{ offer.market.longitude }}">📍 Xaritada ko'rish</a>
+  </div>
+  {% empty %}
+  <p class="mu">Hozircha narx kiritilmagan</p>
+  {% endfor %}
+
+  <form method="post" action="{% url 'order_create' product.slug %}">
+      {% csrf_token %}
+      <button type="submit" class="btn" style="width:100%;height:44px">Buyurtma berish</button>
+  </form>
+ </div>
+</div>
+
+<div class="card" style="margin-top:20px">
+ <h3>Foydalanuvchilar baholari va izohlar</h3>
+ <div id="cms">
+    {% for review in product.reviews.all %}
+    <div class="cm"><b>{{ review.user.first_name }}</b> <span class="st">{% for i in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}</span><div>{{ review.comment }}</div></div>
+    {% empty %}
+    <p class="mu">Hozircha izoh yo'q</p>
+    {% endfor %}
+ </div>
+
+ {% if user.is_authenticated %}
+ <h3 style="margin-top:18px">Izoh qoldirish</h3>
+ <form method="post" action="{% url 'product_review' product.slug %}">
+     {% csrf_token %}
+     <select name="rating"><option value="5">★★★★★ (5)</option><option value="4">★★★★ (4)</option><option value="3">★★★ (3)</option><option value="2">★★ (2)</option><option value="1">★ (1)</option></select>
+     <textarea name="comment" rows="3" placeholder="Fikringizni yozing..."></textarea>
+     <button type="submit" class="btn">Yuborish</button>
+ </form>
+ {% else %}
+ <p class="mu" style="margin-top:12px"><a href="{% url 'login' %}?next={{ request.path }}" style="color:#0a7d5a;font-weight:600">Izoh qoldirish uchun kiring</a></p>
+ {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function sw(e){
+    const src = e.getAttribute('data-src');
+    document.getElementById('big').innerHTML = '<img src="' + src + '">';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Comfort Savdo — Bosh sahifa{% endblock %}
+
+{% block content %}
+<form class="search" method="get" action="{% url 'search' %}"><input name="q" placeholder="Mahsulot qidiring — eng arzon narxni topamiz..."><button class="btn" type="submit">Qidirish</button></form>
+
+<h2>Kategoriyalar</h2>
+<div class="tiles">
+    {% for category in categories %}
+        <a class="tile" style="--c:{{ category.color }}" href="{% url 'category_detail' category.slug %}">
+            <b>{{ category.title }}</b>
+            <small>{{ category.subtitle }}</small>
+            <span class="im">{{ category.image|safe }}</span>
+        </a>
+    {% endfor %}
+</div>
+
+<h2>Eng arzon takliflar</h2>
+<div class="grid">
+    {% for product in products %}
+        <a class="pc" href="{% url 'product_detail' product.slug %}">
+            <div class="im" style="--c:{{ product.category.color }}">
+                {% if product.thumbnail_image %}<img src="{{ product.thumbnail_image.image.url }}" alt="{{ product.title }}">{% else %}🛍️{% endif %}
+            </div>
+            <div class="b">
+                <b>{{ product.title }}</b>
+                <div class="mu">{{ product.cheapest_market_name }}</div>
+                <div class="pr">{{ product.min_price|intcomma }} so'm</div>
+                <span class="st">{% for i in "12345" %}{% if forloop.counter <= product.avg_rating %}★{% else %}☆{% endif %}{% endfor %}</span>
+                <span class="mu">{{ product.avg_rating|floatformat:1|default:"0" }}</span>
+            </div>
+        </a>
+    {% endfor %}
+</div>
+{% endblock %}
